@@ -13,6 +13,7 @@ typedef struct __evgpio_watcher_t
     ev_io _ev_io;
     int gpio_num;
     evgpio_watcher_cb cb;
+    struct __evgpio_watcher_t* next;
 } evgpio_watcher_s;
 
 static void __gpio_cb(struct ev_loop *loop, ev_io* _w, int revents)
@@ -28,15 +29,52 @@ static void __gpio_cb(struct ev_loop *loop, ev_io* _w, int revents)
 
     if (r1 < 0 || r2 < 0)
     {
-        ev_io_stop(loop, _w);
-        close(w->_ev_io.fd);
-        free(w);
+        evgpio_watcher_remove(loop, w->gpio_num);
         return;
     }
 
     w->cb(w->gpio_num, x);
 }
 
+static evgpio_watcher_s* __evgpio_watcher_list = 0;
+
+void evgpio_watcher_print_list()
+{
+    evgpio_watcher_s* w = __evgpio_watcher_list;
+    while (w)
+    {
+        printf("%d;", w->gpio_num);
+        w = w->next;
+    }
+    printf("\n");
+}
+
+void evgpio_watcher_remove(struct ev_loop* loop, int gpio_num)
+{
+    evgpio_watcher_s* w = __evgpio_watcher_list;
+    evgpio_watcher_s* _prev = 0;
+
+    while (w)
+    {
+        if (w->gpio_num == gpio_num)
+        {
+            ev_io_stop(loop, &(w->_ev_io));
+            close(w->_ev_io.fd);
+            if (_prev)
+            {
+                _prev->next = w->next;
+            }
+            else
+            {
+                __evgpio_watcher_list = w->next;
+            }
+            break;
+        }
+        _prev = w;
+        w = w->next;
+        free(w);
+    }
+}
 
 int evgpio_watcher_init(struct ev_loop* loop, int gpio_num, evgpio_watcher_cb _cb)
 {
@@ -94,6 +132,9 @@ int evgpio_watcher_init(struct ev_loop* loop, int gpio_num, evgpio_watcher_cb _c
     ev_io_init(&(w->_ev_io), __gpio_cb, fd, EV_PRI);
     w->gpio_num = gpio_num;
     w->cb = _cb;
+    w->next = __evgpio_watcher_list;
+    __evgpio_watcher_list = w;
+
     ev_io_start(loop, &(w->_ev_io));
 
     return 0;

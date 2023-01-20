@@ -15,6 +15,7 @@
 static void timeout_cb(struct ev_loop *loop, ev_timer* w, int revents)
 {
     fprintf(stderr, "timer!\n");
+    evgpio_watcher_print_list();
     ev_break (EV_A_ EVBREAK_ONE);
     ev_timer_again(loop, w);
 }

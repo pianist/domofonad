@@ -12,12 +12,20 @@
 
 #define MAX_GPIO_WATCH 8
 
+static int __CNT = 0;
+
 static void timeout_cb(struct ev_loop *loop, ev_timer* w, int revents)
 {
     fprintf(stderr, "timer!\n");
     evgpio_watcher_print_list();
-    ev_break (EV_A_ EVBREAK_ONE);
+    ev_break(EV_A_ EVBREAK_ONE);
+
+    //if (__CNT == 3) evgpio_watcher_remove(loop, 3);
+    //if (__CNT == 4) evgpio_watcher_remove(loop, 4);
+    //if (__CNT > 10) { ev_timer_stop(loop, w); }  else ev_timer_again(loop, w);
+
     ev_timer_again(loop, w);
+    __CNT++;
 }
 
 void my_gpio_cb(int gpio_num, char state)
@@ -78,10 +86,11 @@ int main(int argc, char** argv)
     timeout_watcher.repeat = 2.;
     ev_timer_start(loop, &timeout_watcher);
 
-    while (!ret)
+    do
     {
-        ev_run(loop, 0);
+        ret = ev_run(loop, 0);
     }
+    while (ret);
 
     return ret;
 }

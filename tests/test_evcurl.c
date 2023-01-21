@@ -1,29 +1,31 @@
 #include <evcurl/evcurl.h>
 
+void req_end_cb(evcurl_http_req_result_t* res)
+{
+    printf("Req DONE: %d\n", res->result);
+    printf("    effective URL: %s\n", res->effective_url);
+    printf("    %ld\n", res->response_code);
+    printf("    Content-Type: %s\n", res->content_type ? res->content_type : "(none)");
 
+    if (!res->sz_body) return;
+
+    printf("\n\n%.*s\n--------------------------------------------------------------\n", (int)res->sz_body, (const char*)res->body);
+}
 
 
 int main(int argc, char **argv)
 {
     struct ev_loop *loop = ev_loop_new(EVBACKEND_POLL | EVFLAG_NOENV);
 
-    evcurl_processor_t* __evcurl_p = evcurl_create(loop);
+    evcurl_processor_t* _p = evcurl_create(loop);
 
-    new_conn("http://192.168.88.1/", __evcurl_p);
-    new_conn("http://192.168.88.2/", __evcurl_p);
-    new_conn("https://mail.ru/", __evcurl_p);
-    new_conn("https://fvgwretrmail.ru/", __evcurl_p);
+    evcurl_new_http_GET(_p, "http://192.168.88.1/", req_end_cb);
+    evcurl_new_http_GET(_p, "http://192.168.88.222/", req_end_cb);
+    evcurl_new_http_GET(_p, "https://example.com/", req_end_cb);
 
-    ev_loop(__evcurl_p->loop, 0);
+    ev_loop(_p->loop, 0);
 
-
-    new_conn("http://192.168.88.2/", __evcurl_p);
-    new_conn("http://192.168.88.4/", __evcurl_p);
-    new_conn("http://192.168.88.5/", __evcurl_p);
-
-    ev_loop(__evcurl_p->loop, 0);
-
-    evcurl_destroy(__evcurl_p);
+    evcurl_destroy(_p);
 
     ev_loop_destroy(loop);
 }

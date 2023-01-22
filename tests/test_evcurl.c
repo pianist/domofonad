@@ -1,6 +1,6 @@
 #include <evcurl/evcurl.h>
 
-void req_end_cb(evcurl_http_req_result_t* res)
+void req_end_cb(evcurl_req_result_t* res)
 {
     printf("Req DONE: %d\n", res->result);
     printf("    effective URL: %s\n", res->effective_url);

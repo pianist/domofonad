@@ -6,7 +6,7 @@ typedef struct evcurl_http_req_info_s
     CURL* easy;
     evcurl_processor_t* mp;
     evcurl_http_req_done_cb finish_cb;
-    evcurl_http_req_result_t result;
+    evcurl_req_result_t result;
 } evcurl_http_req_info_t;
 
 

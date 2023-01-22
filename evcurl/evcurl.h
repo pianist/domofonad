@@ -30,7 +30,19 @@ typedef struct evcurl_http_req_result_s
 
 typedef void (*evcurl_http_req_done_cb)(evcurl_http_req_result_t* res);
 
-CURLMcode evcurl_new_http_GET(evcurl_processor_t *mp, char *url, evcurl_http_req_done_cb _finish_cb);
+typedef struct evcurl_http_req_param_s
+{
+    long max_redirs;
+
+    long connect_timeout_ms;
+    long timeout_ms;
+
+    long httpauth;
+    const char* username;
+    const char* password;
+} evcurl_http_req_param_t;
+
+CURLMcode evcurl_new_http_GET(evcurl_processor_t *mp, char *url, evcurl_http_req_done_cb _finish_cb, const evcurl_http_req_param_t* params);
 
 #endif //__evcurl_h__
 

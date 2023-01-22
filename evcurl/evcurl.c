@@ -5,7 +5,7 @@ typedef struct evcurl_http_req_info_s
 {
     CURL* easy;
     evcurl_processor_t* mp;
-    evcurl_http_req_done_cb finish_cb;
+    evcurl_req_done_cb finish_cb;
     evcurl_req_result_t result;
 } evcurl_http_req_info_t;
 
@@ -198,7 +198,7 @@ static size_t __simple_body_write_cb(void *ptr, size_t size, size_t nmemb, void 
     return realsize;
 }
 
-CURLMcode evcurl_new_http_GET(evcurl_processor_t *mp, char *url, evcurl_http_req_done_cb _finish_cb)
+CURLMcode evcurl_new_http_GET(evcurl_processor_t *mp, char *url, evcurl_req_done_cb _finish_cb)
 {
     evcurl_http_req_info_t *conn;
     CURLMcode rc;

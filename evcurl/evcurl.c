@@ -7,7 +7,6 @@ typedef struct evcurl_http_req_info_s
     evcurl_processor_t* mp;
     evcurl_http_req_done_cb finish_cb;
     evcurl_http_req_result_t result;
-    char error[CURL_ERROR_SIZE];
 } evcurl_http_req_info_t;
 
 
@@ -199,13 +198,12 @@ static size_t __simple_body_write_cb(void *ptr, size_t size, size_t nmemb, void 
     return realsize;
 }
 
-CURLMcode evcurl_new_http_GET(evcurl_processor_t *mp, char *url, evcurl_http_req_done_cb _finish_cb, const evcurl_http_req_param_t* params)
+CURLMcode evcurl_new_http_GET(evcurl_processor_t *mp, char *url, evcurl_http_req_done_cb _finish_cb)
 {
     evcurl_http_req_info_t *conn;
     CURLMcode rc;
 
     conn = calloc(1, sizeof(evcurl_http_req_info_t));
-    conn->error[0]='\0';
 
     conn->easy = curl_easy_init();
     if (!conn->easy) return CURLM_OUT_OF_MEMORY;
@@ -215,24 +213,17 @@ CURLMcode evcurl_new_http_GET(evcurl_processor_t *mp, char *url, evcurl_http_req
 
     curl_easy_setopt(conn->easy, CURLOPT_URL, url);
 
-    if (params)
-    {
-        if (params->max_redirs)
-        {
-            curl_easy_setopt(conn->easy, CURLOPT_FOLLOWLOCATION, 1);
-            curl_easy_setopt(conn->easy, CURLOPT_MAXREDIRS, params->max_redirs);
-        }
+    curl_easy_setopt(conn->easy, CURLOPT_FOLLOWLOCATION, 1);
+    curl_easy_setopt(conn->easy, CURLOPT_MAXREDIRS, 3);
 
-        curl_easy_setopt(conn->easy, CURLOPT_TIMEOUT_MS, params->timeout_ms);
-        curl_easy_setopt(conn->easy, CURLOPT_CONNECTTIMEOUT_MS, params->connect_timeout_ms);
-    }
+    curl_easy_setopt(conn->easy, CURLOPT_TIMEOUT, 30);
+    curl_easy_setopt(conn->easy, CURLOPT_CONNECTTIMEOUT, 5);
 
 //    curl_easy_setopt(conn->easy, CURLOPT_HEADERFUNCTION, __XXX_header_cb);
 //    curl_easy_setopt(conn->easy, CURLOPT_HEADERDATA, conn);
     curl_easy_setopt(conn->easy, CURLOPT_WRITEFUNCTION, __simple_body_write_cb);
     curl_easy_setopt(conn->easy, CURLOPT_WRITEDATA, conn);
 
-    curl_easy_setopt(conn->easy, CURLOPT_ERRORBUFFER, conn->error);
     curl_easy_setopt(conn->easy, CURLOPT_PRIVATE, conn);
 
     rc = curl_multi_add_handle(mp->multi, conn->easy);

@@ -19,9 +19,9 @@ int main(int argc, char **argv)
 
     evcurl_processor_t* _p = evcurl_create(loop);
 
-    evcurl_new_http_GET(_p, "http://192.168.88.1/", req_end_cb, 0);
-    evcurl_new_http_GET(_p, "http://192.168.88.222/", req_end_cb, 0);
-    evcurl_new_http_GET(_p, "https://example.com/", req_end_cb, 0);
+    evcurl_new_http_GET(_p, "http://192.168.88.1/", req_end_cb);
+    evcurl_new_http_GET(_p, "http://192.168.88.222/", req_end_cb);
+    evcurl_new_http_GET(_p, "https://example.com/", req_end_cb);
 
     ev_loop(_p->loop, 0);
 

@@ -1,0 +1,6 @@
+
+
+TODO:
+ * evcurl_new_UPLOAD (http PUT, ftp, sftp, scp, etc) + tests
+ * ...
+
